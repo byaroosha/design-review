@@ -17,25 +17,33 @@
   color-scheme:light;
   --bg:#f1f2f5; --surface:#ffffff; --surface-2:#f6f7f9; --fg:#17181c; --muted:#5b5f6b; --border:#d8dbe2; --border-strong:#aeb3bf;
   --accent:#c2410c; --accent-fg:#ffffff; --accent-text:#c2410c; --accent-soft:rgba(194,65,12,.14);
-  --mark-soft:rgba(194,65,12,.16); /* accent tint drawn over the design, same in both themes */
   --ux:#0f6e66; --ux-soft:rgba(15,118,110,.13);
   --stake:#7e22ce; --stake-soft:rgba(126,34,206,.11);
   --ok:#166534; --ok-soft:rgba(21,128,61,.13);
   --shadow:0 10px 30px rgba(16,18,24,.16);
+  /* drawn over the design, so the same in both themes */
+  --paper:#ffffff; --mark-ring:#ffffff; --mark-soft:rgba(194,65,12,.16); --mark-shadow:0 1px 4px rgba(0,0,0,.45);
   --font:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
   --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
   --panel-w:400px;
 }
-@media (prefers-color-scheme:dark){
-  :root{
-    color-scheme:dark;
-    --bg:#111216; --surface:#1a1c22; --surface-2:#22252c; --fg:#ececf1; --muted:#a2a6b3; --border:#30343e; --border-strong:#545a68;
-    --accent-text:#ff9a62; --accent-soft:rgba(234,88,12,.26);
-    --ux:#5ed3c7; --ux-soft:rgba(94,211,199,.16);
-    --stake:#cfa5f7; --stake-soft:rgba(200,155,245,.17);
-    --ok:#6fd58a; --ok-soft:rgba(95,207,124,.16);
-    --shadow:0 10px 30px rgba(0,0,0,.55);
-  }
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+  color-scheme:dark;
+  --bg:#111216; --surface:#1a1c22; --surface-2:#22252c; --fg:#ececf1; --muted:#a2a6b3; --border:#30343e; --border-strong:#545a68;
+  --accent-text:#ff9a62; --accent-soft:rgba(234,88,12,.26);
+  --ux:#5ed3c7; --ux-soft:rgba(94,211,199,.16);
+  --stake:#cfa5f7; --stake-soft:rgba(200,155,245,.17);
+  --ok:#6fd58a; --ok-soft:rgba(95,207,124,.16);
+  --shadow:0 10px 30px rgba(0,0,0,.55);
+} }
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#111216; --surface:#1a1c22; --surface-2:#22252c; --fg:#ececf1; --muted:#a2a6b3; --border:#30343e; --border-strong:#545a68;
+  --accent-text:#ff9a62; --accent-soft:rgba(234,88,12,.26);
+  --ux:#5ed3c7; --ux-soft:rgba(94,211,199,.16);
+  --stake:#cfa5f7; --stake-soft:rgba(200,155,245,.17);
+  --ok:#6fd58a; --ok-soft:rgba(95,207,124,.16);
+  --shadow:0 10px 30px rgba(0,0,0,.55);
 }
 
 *,*::before,*::after{box-sizing:border-box}
@@ -60,7 +68,7 @@ button:disabled{cursor:not-allowed;opacity:.45}
 #boot-pick{margin-top:16px}
 
 /* ---------- app shell ---------- */
-#app{height:100vh;height:100dvh;display:flex;flex-direction:column}
+#app{height:100%;display:flex;flex-direction:column}
 #bar{flex:none;position:relative;z-index:6;display:flex;align-items:center;flex-wrap:wrap;gap:8px 10px;background:var(--surface);border-bottom:1px solid var(--border);
   padding:max(8px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) 8px max(16px,env(safe-area-inset-left,0px))}
 .brand{display:flex;align-items:center;gap:8px;min-width:0;flex:0 1 auto;max-width:34ch;font-weight:650}
@@ -137,7 +145,7 @@ details.warn ul{margin:6px 0 0;padding-left:18px}
 .screen-cap{display:flex;align-items:baseline;gap:8px;padding:7px 12px;border-bottom:1px solid var(--border);font-size:12.5px}
 .screen-cap .step{font-family:var(--mono);color:var(--muted);font-variant-numeric:tabular-nums}
 .screen-cap .name{font-weight:600;overflow-wrap:anywhere}
-.shot{position:relative;background:#fff;line-height:0;user-select:none;-webkit-user-select:none}
+.shot{position:relative;background:var(--paper);line-height:0;user-select:none;-webkit-user-select:none}
 .shot img{display:block;width:100%;height:auto}
 .shot .missing{display:flex;align-items:center;justify-content:center;min-height:200px;padding:24px;background:var(--surface-2);color:var(--muted);font-size:13px;line-height:1.45;text-align:center;overflow-wrap:anywhere}
 .hots,.pins{position:absolute;inset:0;pointer-events:none}
@@ -147,13 +155,13 @@ details.warn ul{margin:6px 0 0;padding-left:18px}
 .hot:hover,.hot:focus-visible,.shot.flash .hot{border-color:var(--accent);background:var(--mark-soft);outline:none}
 .shot.picking{cursor:crosshair}
 .shot.picking .hot,.shot.picking .pin{pointer-events:none}
-.pin{position:absolute;transform:translate(-50%,-50%);min-width:24px;height:24px;padding:0 5px;border:2px solid #fff;border-radius:12px;background:var(--accent);color:var(--accent-fg);
-  font-size:12px;font-weight:700;line-height:20px;text-align:center;font-variant-numeric:tabular-nums;box-shadow:0 1px 4px rgba(0,0,0,.45);pointer-events:auto}
-.pin.on{transform:translate(-50%,-50%) scale(1.2);box-shadow:0 0 0 3px var(--accent),0 0 0 9px var(--mark-soft),0 1px 4px rgba(0,0,0,.45)}
-.pin.draft{background:#fff;color:#c2410c;border:2px dashed #c2410c;pointer-events:none}
+.pin{position:absolute;transform:translate(-50%,-50%);min-width:24px;height:24px;padding:0 5px;border:2px solid var(--mark-ring);border-radius:12px;background:var(--accent);color:var(--accent-fg);
+  font-size:12px;font-weight:700;line-height:20px;text-align:center;font-variant-numeric:tabular-nums;box-shadow:var(--mark-shadow);pointer-events:auto}
+.pin.on{transform:translate(-50%,-50%) scale(1.2);box-shadow:0 0 0 3px var(--accent),0 0 0 9px var(--mark-soft),var(--mark-shadow)}
+.pin.draft{background:var(--paper);color:var(--accent);border:2px dashed var(--accent);pointer-events:none}
 
 /* ---------- embedded designs (figma, code) ---------- */
-.frame{position:relative;flex:1 1 auto;min-height:360px;border:1px solid var(--border);border-radius:10px;background:#fff;overflow:hidden;box-shadow:0 1px 2px rgba(16,18,24,.06)}
+.frame{position:relative;flex:1 1 auto;min-height:360px;border:1px solid var(--border);border-radius:10px;background:var(--paper);overflow:hidden;box-shadow:0 1px 2px rgba(16,18,24,.06)}
 .frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block}
 .capture{position:absolute;inset:0;z-index:4;cursor:crosshair;background:var(--mark-soft)}
 
@@ -225,6 +233,7 @@ details.dismissed .list{display:flex;flex-direction:column;gap:8px;margin-top:8p
 .cform .note{font-size:12px;color:var(--muted)}
 .where-note{flex:none;margin:0;padding:10px 14px;border-top:1px solid var(--border);background:var(--surface-2);font-size:12.5px;color:var(--muted)}
 .where-note .link{padding:0;font-size:12.5px;color:var(--fg)}
+.panel-foot .actions{flex:none;display:flex;align-items:center;gap:8px}
 .panel-foot{flex:none;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 14px calc(8px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--border);font-size:12px;color:var(--muted)}
 
 @media (max-width:1000px){ :root{--panel-w:340px} }
@@ -243,6 +252,8 @@ details.dismissed .list{display:flex;flex-direction:column;gap:8px;margin-top:8p
   #panel.open{transform:none;transition:transform .22s ease,visibility 0s}
   body.peek #panel.open{transform:translateX(100%);visibility:hidden;transition:transform .22s ease,visibility 0s linear .22s}
   .panel-inner{width:100%;padding-top:env(safe-area-inset-top,0px)}
+  .panel-head,.filters,.panel-body,.cform-toggle,.cform form,.where-note,.panel-foot{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+  .tabs{padding-left:max(8px,env(safe-area-inset-left,0px));padding-right:max(8px,env(safe-area-inset-right,0px))}
   /* 16px keeps phones from zooming the page when a field gets focus */
   .field input,.field textarea,.field select,select.ctl{font-size:16px}
 }
@@ -250,7 +261,7 @@ details.dismissed .list{display:flex;flex-direction:column;gap:8px;margin-top:8p
   .shot.flash .hot{animation:hotflash .7s ease-out}
   .pin.on{animation:pinpulse .9s ease-out}
   @keyframes hotflash{0%{box-shadow:0 0 0 0 var(--mark-soft)}45%{box-shadow:0 0 0 8px var(--mark-soft)}100%{box-shadow:0 0 0 0 transparent}}
-  @keyframes pinpulse{0%{box-shadow:0 0 0 3px var(--accent),0 0 0 3px var(--mark-soft)}60%{box-shadow:0 0 0 3px var(--accent),0 0 0 16px var(--mark-soft)}100%{box-shadow:0 0 0 3px var(--accent),0 0 0 9px var(--mark-soft),0 1px 4px rgba(0,0,0,.45)}}
+  @keyframes pinpulse{0%{box-shadow:0 0 0 3px var(--accent),0 0 0 3px var(--mark-soft)}60%{box-shadow:0 0 0 3px var(--accent),0 0 0 16px var(--mark-soft)}100%{box-shadow:0 0 0 3px var(--accent),0 0 0 9px var(--mark-soft),var(--mark-shadow)}}
 }
 @media (prefers-reduced-motion:reduce){
   #panel,#panel.open,body.peek #panel.open,.cform-toggle svg{transition:none}
@@ -599,7 +610,7 @@ function cleanEntry(e) {
 let CONFIG = null;
 const state = {
   role: 'designer', updateKey: '', menu: false,
-  panel: false, tab: 'ux', filter: 'All', selected: null, showDismissed: false, formOpen: !NARROW.matches, posted: false,
+  panel: false, tab: 'ux', filter: 'All', selected: null, showDismissed: false, formOpen: !NARROW.matches, posted: false, confirmReset: false,
   picking: false, peek: false, toast: '',
   current: null, history: [],
   forms: { ux: newForm(), stakeholder: newForm() }
@@ -868,8 +879,11 @@ function renderPanel() {
     '</div>' +
     (canPost() ? formHtml() : '<p class="where-note">' + (designer ? 'Your own notes go under ' : 'To leave feedback, go to ') +
       '<button type="button" class="link" data-tab="' + other + '">' + TABS[other].label + '</button>.</p>') +
-    '<div class="panel-foot"><span>' + (store.ok ? 'Posts, status changes and dismissals are saved in this browser only.' : 'This browser is blocking storage, so changes here will not survive a refresh.') +
-      '</span><button type="button" class="link" id="reset-btn">Reset</button></div>');
+    '<div class="panel-foot">' + (state.confirmReset
+      ? '<span role="alert">Clear the posts, status changes and dismissals saved in this browser? Comments from the config stay.</span>' +
+        '<span class="actions"><button type="button" class="link" id="reset-cancel">Keep</button><button type="button" class="btn small" id="reset-confirm">Clear</button></span>'
+      : '<span>' + (store.ok ? 'Posts, status changes and dismissals are saved in this browser only.' : 'This browser is blocking storage, so changes here will not survive a refresh.') +
+        '</span><button type="button" class="link" id="reset-btn">Reset</button>') + '</div>');
 
   const body = $('.panel-body', inner);
   if (body) body.scrollTop = scroll;
@@ -953,21 +967,21 @@ function toggleMenu(open) {
 
 function togglePanel(open) {
   state.panel = open === undefined ? !state.panel : open;
-  state.selected = null; state.peek = false; state.picking = false; state.posted = false;
+  state.selected = null; state.peek = false; state.picking = false; state.posted = false; state.confirmReset = false;
   render();
 }
 
 function setRole(role) {
   if (role !== 'designer' && role !== 'stakeholder') return;
   state.role = role; store.data.role = role; store.save();
-  state.picking = false; state.peek = false; state.posted = false;
+  state.picking = false; state.peek = false; state.posted = false; state.confirmReset = false;
   if (state.selected && !liveComments(state.tab).some(c => c.id === state.selected)) state.selected = null;
   render();
 }
 
 function setTab(tab) {
   if (!TABS[tab] || tab === state.tab) return;
-  state.tab = tab; state.selected = null; state.picking = false; state.peek = false; state.posted = false; state.showDismissed = false;
+  state.tab = tab; state.selected = null; state.picking = false; state.peek = false; state.posted = false; state.showDismissed = false; state.confirmReset = false;
   render();
 }
 
@@ -1087,11 +1101,17 @@ function postComment() {
   const body = $('.panel-body'); if (body) body.scrollTop = 0;
 }
 
+/* Reset asks first, inside the panel rather than with a browser dialog. */
+function askReset(on) {
+  state.confirmReset = on;
+  render();
+  const el = $(on ? '#reset-cancel' : '#reset-btn');
+  if (el) el.focus();
+}
 function resetSaved() {
-  if (!window.confirm('Clear the comments, status changes and dismissals saved in this browser for “' + CONFIG.project.name + '”? Comments from the config file stay.')) return;
   store.reset();
   state.selected = null; state.picking = false; state.peek = false; state.posted = false;
-  render();
+  askReset(false);
 }
 
 /* The open comments of the selected update, both lists, as Markdown. Resolved and dismissed ones are left out. */
@@ -1155,7 +1175,9 @@ function onPanelClick(e) {
   let el;
   if (t.closest('#panel-close')) { togglePanel(false); $('#comments-btn').focus(); return; }
   if ((el = t.closest('#copy-btn'))) { copyOpenComments(el); return; }
-  if (t.closest('#reset-btn')) { resetSaved(); return; }
+  if (t.closest('#reset-btn')) { askReset(true); return; }
+  if (t.closest('#reset-cancel')) { askReset(false); return; }
+  if (t.closest('#reset-confirm')) { resetSaved(); return; }
   if ((el = t.closest('[data-tab]'))) { setTab(el.dataset.tab); return; }
   if ((el = t.closest('[data-filter]'))) {
     state.filter = el.dataset.filter;
@@ -1222,7 +1244,7 @@ function onKey(e) {
 function bind() {
   $('#update-select').addEventListener('change', e => {
     state.updateKey = e.target.value;
-    state.selected = null; state.picking = false; state.peek = false; state.posted = false; state.showDismissed = false;
+    state.selected = null; state.picking = false; state.peek = false; state.posted = false; state.showDismissed = false; state.confirmReset = false;
     render();
   });
   $('#changes-btn').addEventListener('click', () => toggleMenu());
