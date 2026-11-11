@@ -344,7 +344,7 @@ const CATEGORIES = ['Accessibility','Design system','Content','Flow','General'];
 const state = {
   role:'designer', sectionId: DATA.sections[0].id, updateId: DATA.updates[0].id, panel:false, tab:'ux', filter:'All',
   selected:null, picking:false, present:false,
-  view:'proto', current:null, showHot:true, history:[],
+  view:'proto', current:null, showHot:false, history:[],
   form:{ name:'', text:'', category:'General', type:'general', screen:null, fx:null, fy:null },
   posted:{}, edits:{},
 };
