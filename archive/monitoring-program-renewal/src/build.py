@@ -117,7 +117,9 @@ known = {s['id'] for sec in SECTIONS for g in sec['groups'] for s in g['screens'
 bad = [(k, t) for k, hs in HOTSPOTS.items() for h in hs for t in [h[5]] if k not in known or t not in known]
 if bad: print('BAD HOTSPOT IDS', bad)
 
-DATA_JS = json.dumps({'fileKey': FILE_KEY, 'updates': UPDATES, 'sections': SECTIONS, 'hotspots': HOTSPOTS}, ensure_ascii=False)
+# Set EMPTY_MIDDLE = False once the Figma screens should show again; everything else stays wired up.
+EMPTY_MIDDLE = True
+DATA_JS = json.dumps({'fileKey': FILE_KEY, 'updates': UPDATES, 'sections': SECTIONS, 'hotspots': HOTSPOTS, 'empty': EMPTY_MIDDLE}, ensure_ascii=False)
 
 PAGE = r'''<title>Monitoring Program Renewal Review</title>
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -125,24 +127,25 @@ PAGE = r'''<title>Monitoring Program Renewal Review</title>
 <style>
 /* Layout: fixed review bar; a scrolling stage that lists the Figma screens of one flow in order; a side panel that takes width from the stage. */
 :root{
-  --bg:#f2f3f6; --surface:#ffffff; --surface-2:#f7f8fa; --fg:#17181c; --muted:#646873; --border:#d9dce3; --border-strong:#b9bec9;
-  --accent:#e8590c; --accent-soft:rgba(232,89,12,.14); --accent-fg:#ffffff;
-  --ux:#0f766e; --ux-soft:rgba(15,118,110,.12); --stake:#7e22ce; --stake-soft:rgba(126,34,206,.12);
-  --ok:#15803d; --ok-soft:rgba(21,128,61,.12); --warn:#a16207; --warn-soft:rgba(161,98,7,.14); --bad:#c2302b;
+  /* Palette from the Wireframe Component Library: UX Base grays, UX Accents */
+  --bg:#EEF0F7; --surface:#FFFFFF; --surface-2:#F6F8FD; --fg:#1B202B; --muted:#737D94; --border:#CDD2DF; --border-strong:#A2ABBE;
+  --accent:#5BADF1; --accent-soft:#B9DBFC; --accent-fg:#1B202B; --on-color:#1B202B;
+  --ux:#6CD860; --ux-soft:#DAFEDC; --stake:#8280F7; --stake-soft:#D2D1FC;
+  --ok:#6CD860; --ok-soft:#DAFEDC; --warn:#F8D65B; --warn-soft:#FCEEB5; --bad:#EC5F59; --bad-soft:#F5BBBA;
   --font-ui:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif; --font-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
   --shadow:0 8px 24px rgba(16,18,24,.10);
 }
 @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
-  --bg:#121317; --surface:#1b1d23; --surface-2:#22252d; --fg:#e9e9ee; --muted:#9a9eab; --border:#2d313b; --border-strong:#444a57;
-  --accent:#ff8a4c; --accent-soft:rgba(255,138,76,.18); --accent-fg:#1a0d05;
-  --ux:#5ed3c7; --ux-soft:rgba(94,211,199,.16); --stake:#c89bf5; --stake-soft:rgba(200,155,245,.16);
-  --ok:#5fcf7c; --ok-soft:rgba(95,207,124,.16); --warn:#e3c04a; --warn-soft:rgba(227,192,74,.16); --bad:#f26b63;
+  --bg:#1B202B; --surface:#2F3647; --surface-2:#3A4254; --fg:#EEF0F7; --muted:#A2ABBE; --border:#4C5466; --border-strong:#737D94;
+  --accent:#5BADF1; --accent-soft:rgba(91,173,241,.28); --accent-fg:#1B202B; --on-color:#1B202B;
+  --ux:#6CD860; --ux-soft:#DAFEDC; --stake:#8280F7; --stake-soft:#D2D1FC;
+  --ok:#6CD860; --ok-soft:#DAFEDC; --warn:#F8D65B; --warn-soft:#FCEEB5; --bad:#EC5F59; --bad-soft:#F5BBBA;
   --shadow:0 8px 24px rgba(0,0,0,.45); color-scheme:dark } }
 :root[data-theme="dark"]{
-  --bg:#121317; --surface:#1b1d23; --surface-2:#22252d; --fg:#e9e9ee; --muted:#9a9eab; --border:#2d313b; --border-strong:#444a57;
-  --accent:#ff8a4c; --accent-soft:rgba(255,138,76,.18); --accent-fg:#1a0d05;
-  --ux:#5ed3c7; --ux-soft:rgba(94,211,199,.16); --stake:#c89bf5; --stake-soft:rgba(200,155,245,.16);
-  --ok:#5fcf7c; --ok-soft:rgba(95,207,124,.16); --warn:#e3c04a; --warn-soft:rgba(227,192,74,.16); --bad:#f26b63;
+  --bg:#1B202B; --surface:#2F3647; --surface-2:#3A4254; --fg:#EEF0F7; --muted:#A2ABBE; --border:#4C5466; --border-strong:#737D94;
+  --accent:#5BADF1; --accent-soft:rgba(91,173,241,.28); --accent-fg:#1B202B; --on-color:#1B202B;
+  --ux:#6CD860; --ux-soft:#DAFEDC; --stake:#8280F7; --stake-soft:#D2D1FC;
+  --ok:#6CD860; --ok-soft:#DAFEDC; --warn:#F8D65B; --warn-soft:#FCEEB5; --bad:#EC5F59; --bad-soft:#F5BBBA;
   --shadow:0 8px 24px rgba(0,0,0,.45); color-scheme:dark }
 
 html,body{height:100%}
@@ -189,7 +192,7 @@ select.ctl{padding-right:28px;appearance:none;-webkit-appearance:none;background
 .stage-inner{max-width:1040px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
 .flow-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
 .flow-head h1{margin:0;font-size:20px;font-weight:600;text-wrap:balance}
-.flow-head .status{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--ok);background:var(--ok-soft);padding:2px 8px;border-radius:999px}
+.flow-head .status{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--on-color);background:var(--ok-soft);padding:2px 8px;border-radius:999px}
 .flow-head .meta{color:var(--muted);font-size:12px}
 .subnav{display:flex;gap:6px;flex-wrap:wrap;position:sticky;top:0;z-index:2;background:var(--bg);padding-block:6px;margin-block:-6px}
 .subnav a{font-size:12px;border:1px solid var(--border);background:var(--surface);border-radius:999px;padding:4px 10px;text-decoration:none;color:var(--muted)}
@@ -211,7 +214,7 @@ select.ctl{padding-right:28px;appearance:none;-webkit-appearance:none;background
 .screen.hl{outline:2px solid var(--accent);outline-offset:2px;box-shadow:0 0 0 6px var(--accent-soft)}
 .screen.picking .shot{cursor:crosshair}
 .pin{position:absolute;transform:translate(-50%,-50%);z-index:3;min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:var(--accent);color:var(--accent-fg);border:2px solid var(--surface);font:600 11px/18px var(--font-ui);display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.35);cursor:pointer;font-variant-numeric:tabular-nums}
-.pin.stake{background:var(--stake);color:#fff}
+.pin.stake{background:var(--stake);color:var(--on-color)}
 .pin.on{transform:translate(-50%,-50%) scale(1.25);outline:3px solid var(--accent-soft)}
 .pin.draft{background:var(--fg);color:var(--bg)}
 .hint{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);z-index:6;background:var(--fg);color:var(--bg);padding:8px 14px;border-radius:999px;font-size:13px;box-shadow:var(--shadow);max-width:calc(100% - 32px);text-align:center}
@@ -245,9 +248,10 @@ select.ctl{padding-right:28px;appearance:none;-webkit-appearance:none;background
 .c-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
 .c-meta b{color:var(--fg);font-weight:600}
 .pill{font-size:11px;font-weight:600;padding:1px 7px;border-radius:999px;line-height:16px;white-space:nowrap}
-.pill.ux{background:var(--ux-soft);color:var(--ux)} .pill.stake{background:var(--stake-soft);color:var(--stake)}
-.pill.open{background:var(--surface-2);color:var(--muted);border:1px solid var(--border)} .pill.progress{background:var(--warn-soft);color:var(--warn)} .pill.resolved{background:var(--ok-soft);color:var(--ok)}
-.pill.newpill{background:var(--accent-soft);color:var(--accent)}
+.pill{color:var(--on-color)}
+.pill.ux{background:var(--ux-soft)} .pill.stake{background:var(--stake-soft)}
+.pill.open{background:var(--surface-2);color:var(--muted);border:1px solid var(--border)} .pill.progress{background:var(--warn)} .pill.resolved{background:var(--ok)}
+.pill.newpill{background:var(--accent-soft)}
 .c-text{font-size:13.5px;line-height:1.45;grid-column:2;white-space:pre-line}
 .c-tags{grid-column:2;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
 .tag{font-size:11px;border:1px solid var(--border);border-radius:5px;padding:1px 6px;color:var(--muted);background:var(--surface-2);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -272,7 +276,7 @@ details.dismissed .list{display:flex;flex-direction:column;gap:8px;margin-top:8p
 .btn.small{padding:4px 8px;font-size:12px}
 .area-pick{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .area-pick .tag.area{padding:4px 8px;font-size:12px}
-.toast{color:var(--ok);font-size:12px}
+.toast{color:var(--fg);font-size:12px}
 .panel-foot{border-top:1px solid var(--border);padding:8px 14px;display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12px;color:var(--muted)}
 /* Prototype view */
 .proto{display:grid;grid-template-columns:minmax(0,1fr);gap:18px;align-items:start}
@@ -297,6 +301,8 @@ details.dismissed .list{display:flex;flex-direction:column;gap:8px;margin-top:8p
 .screen.flash{animation:none}
 @media (prefers-reduced-motion:no-preference){ .screen.flash .hot{animation:hotflash .9s ease} @keyframes hotflash{0%,100%{box-shadow:0 0 0 0 var(--accent-soft)}40%{box-shadow:0 0 0 8px var(--accent-soft)}} }
 .end-note{font-size:12.5px;color:var(--muted);border:1px dashed var(--border);border-radius:8px;padding:10px 12px}
+.slot{border:2px dashed var(--border-strong);border-radius:12px;background:var(--surface);min-height:420px;aspect-ratio:16/10;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--muted);text-align:center;padding:24px}
+.slot b{color:var(--fg);font-weight:600;font-size:15px}
 
 body.present #bar,body.present #panel{display:none}
 #exit-present{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:30;box-shadow:var(--shadow)}
@@ -406,15 +412,16 @@ function renderProto(inner){
     <nav class="subnav" aria-label="Sub-flows">${s.groups.map((g,i) => `<a href="#" data-jump="${g.screens[0].id}"${g === sc.group ? ' aria-current="true"' : ''}>${esc(g.label || g.flow)}</a>`).join('')}</nav>
     <div class="proto">
       <div class="proto-main">
-        <div class="crumb"><span>${esc(s.name)}</span><span class="sep">›</span><span>${esc(sc.group.label || sc.group.flow)}</span><span class="sep">›</span><b>Step ${sc.step} of ${list.length}</b></div>
-        <div class="proto-nav"><button type="button" class="btn" id="p-back"${state.history.length?'':' disabled'}>← Back</button><button type="button" class="btn" id="p-next"${idx < list.length-1?'':' disabled'}>Next →</button><span class="spacer"></span><span class="note">${hs.length ? hs.length + (hs.length===1?' clickable area':' clickable areas') + ' on this screen' : 'End of this path'}</span><button type="button" class="btn small" id="p-restart">Restart flow</button></div>
+        <div class="crumb"><span>${esc(s.name)}</span><span class="sep">›</span><span>${esc(sc.group.label || sc.group.flow)}</span>${DATA.empty ? '' : `<span class="sep">›</span><b>Step ${sc.step} of ${list.length}</b>`}</div>
+        ${DATA.empty ? `<div class="slot"><b>Design goes here</b><span>Connect Figma to load the screens for ${esc(sc.group.label || sc.group.flow)}.</span></div>` : `<div class="proto-nav"><button type="button" class="btn" id="p-back"${state.history.length?'':' disabled'}>← Back</button><button type="button" class="btn" id="p-next"${idx < list.length-1?'':' disabled'}>Next →</button><span class="spacer"></span><span class="note">${hs.length ? hs.length + (hs.length===1?' clickable area':' clickable areas') + ' on this screen' : 'End of this path'}</span><button type="button" class="btn small" id="p-restart">Restart flow</button></div>
         <article class="screen${state.showHot?' show-hot':''}" data-screen="${sc.id}"><div class="screen-head"><span class="step">${String(sc.step).padStart(2,'0')}</span><span class="name">${esc(sc.name)}</span></div>${shotHtml(sc)}</article>
-        ${hs.length ? '' : `<div class="end-note">This screen ends the path. Use Back, pick another step on the left, or Restart flow.</div>`}
+        ${hs.length ? '' : `<div class="end-note">This screen ends the path. Use Back, pick another step on the left, or Restart flow.</div>`}`}
       </div></div>`;
 }
 function goTo(id, push){ if(!screenOf(id)) return; if(push && state.current && state.current !== id) state.history.push(state.current); state.current = id; render(); $('#stage').scrollTop = 0; }
 function applyPins(){
   $$('.pins').forEach(p => p.innerHTML = '');
+  if(DATA.empty) return;
   $$('.screen').forEach(el => el.classList.toggle('picking', state.picking));
   const f = state.form;
   if(f.type === 'area' && f.screen && f.fx != null){ const el = $(`[data-screen="${CSS.escape(f.screen)}"] .pins`); if(el) el.innerHTML += `<span class="pin draft" style="left:${f.fx*100}%;top:${f.fy*100}%" title="New comment">+</span>`; }
@@ -459,7 +466,7 @@ function renderPanel(){
     <div class="panel-body">${filtered.length ? filtered.map(c => renderComment(c,false)).join('') : `<div class="empty">${live.length ? 'Nothing in this category.' : (state.tab==='ux' ? 'No insights for this update yet.' : 'No feedback on this update yet.')}</div>`}
       ${(dismissed.length && roleIsDesigner()) ? `<details class="dismissed"><summary>Dismissed (${dismissed.length})</summary><div class="list">${dismissed.map(c => renderComment(Object.assign({n:'·'},c),true)).join('')}</div></details>` : ''}</div>
     ${canPost ? renderForm() : ''}
-    <div class="panel-foot"><span>UX insights come from the Figma file. Posts and dismissals are saved in this browser only.</span><button type="button" class="link-btn" id="reset-btn">Reset</button></div>`;
+    <div class="panel-foot"><span>${DATA.empty ? 'Screens are hidden until Figma is connected. ' : 'UX insights come from the Figma file. '}Posts and dismissals are saved in this browser only.</span><button type="button" class="link-btn" id="reset-btn">Reset</button></div>`;
   if(canPost){ $('#f-name').value = state.form.name; $('#f-text').value = state.form.text; syncPost(); }
 }
 function renderComment(c, isDismissed){
@@ -473,7 +480,7 @@ function renderComment(c, isDismissed){
     <div class="num${sel?' on':''}${linked?'':' general'}">${linked?c.n:'·'}</div>
     <div class="c-meta"><b>${esc(c.author)}</b>${rolePill}${c.date?`<span>${esc(fmtDate(c.date))}</span>`:''}${c.isNew?'<span class="pill newpill">New this update</span>':''}${statusPill}</div>
     <div class="c-text">${esc(c.text)}</div>
-    <div class="c-tags">${scr?`<span class="tag area" title="${esc(scr.name)}">${String(scr.step).padStart(2,'0')} · ${esc(scr.name)}</span>`:'<span class="tag">General</span>'}<span class="tag">${esc(c.category)}</span></div>
+    <div class="c-tags">${scr?`<span class="tag area" title="${esc(scr.name)}">${String(scr.step).padStart(2,'0')} · ${esc(scr.name)}</span>`:'<span class="tag">General</span>'}${(!scr && c.category === 'General') ? '' : `<span class="tag">${esc(c.category)}</span>`}</div>
     ${actions?`<div class="c-actions">${actions}</div>`:''}</div>`;
 }
 function renderForm(){
@@ -481,7 +488,7 @@ function renderForm(){
   return `<form class="cform" id="cform"><h3>Add ${role==='UX'?'an insight':'feedback'} as ${role}</h3>
     <div class="two"><div><label class="sr-only" for="f-name">Your name</label><input id="f-name" placeholder="Your name"></div><div><label class="sr-only" for="f-cat">Category</label><select id="f-cat">${CATEGORIES.map(c => `<option${f.category===c?' selected':''}>${c}</option>`).join('')}</select></div></div>
     <label class="sr-only" for="f-text">Comment</label><textarea id="f-text" placeholder="What should change, and why?"></textarea>
-    <div class="area-pick"><div class="seg" role="group" aria-label="Comment type"><button type="button" data-ftype="general" aria-pressed="${f.type==='general'}">General</button><button type="button" data-ftype="area" aria-pressed="${f.type==='area'}">Specific spot</button></div>
+    <div class="area-pick">${DATA.empty ? '' : `<div class="seg" role="group" aria-label="Comment type"><button type="button" data-ftype="general" aria-pressed="${f.type==='general'}">General</button><button type="button" data-ftype="area" aria-pressed="${f.type==='area'}">Specific spot</button></div>`}
       ${f.type==='area' ? (scr ? `<span class="tag area" title="${esc(scr.name)}">${String(scr.step).padStart(2,'0')} · ${esc(scr.name)}</span><button type="button" class="link-btn" id="pick-change">Change</button><button type="button" class="link-btn" id="pick-remove">Remove</button>` : `<button type="button" class="btn small" id="pick-area">${state.picking?'Click a spot on a screen…':'Pick a spot on a screen'}</button>`) : ''}</div>
     <div class="foot"><button type="submit" class="btn primary" id="post-btn" disabled>Post</button><span class="toast" id="post-toast"></span></div></form>`;
 }
